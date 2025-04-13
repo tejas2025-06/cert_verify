@@ -143,115 +143,133 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24">
-      <h1 className="text-4xl font-bold mb-8">Certificate Verification System</h1>
-      
+    <main className="min-h-screen p-8 bg-gray-50">
+      <h1 className="text-4xl font-bold text-center mb-8 text-indigo-800">Certificate Verification System</h1>
       {!connected ? (
-        <button
-          onClick={connectWallet}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Connect Wallet
-        </button>
+        <div className="max-w-md mx-auto text-center">
+          <button
+            onClick={connectWallet}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Connect Wallet
+          </button>
+        </div>
       ) : (
-        <div className="w-full max-w-md">
-          <div className="mb-4">
-            <p className="text-sm text-gray-500">Connected Account:</p>
-            <p className="font-mono">{account}</p>
-            <button
-              onClick={authorizeNewIssuer}
-              className="mt-2 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-              disabled={loading}
-            >
-              Authorize New Issuer
-            </button>
-          </div>
-          
-          {/* Issue Certificate Form */}
-          <div className="mb-8 p-4 border rounded">
-            <h2 className="text-xl font-bold mb-4">Issue Certificate</h2>
-            <form onSubmit={issueCertificate}>
-              <div className="mb-4">
+        <div>
+          <div className="grid grid-cols-3 gap-8">
+            {/* Issuer Column */}
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold mb-6 text-center text-purple-600">Issuer Portal</h2>
+              <div className="mb-6">
+                <button
+                  onClick={authorizeNewIssuer}
+                  className="w-full bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+                  disabled={loading}
+                >
+                  Authorize New Issuer
+                </button>
+              </div>
+              <form onSubmit={issueCertificate} className="space-y-4">
                 <input
                   type="text"
                   value={issuanceForm.studentName}
                   onChange={(e) => setIssuanceForm(prev => ({ ...prev, studentName: e.target.value }))}
                   placeholder="Student Name"
-                  className="w-full p-2 border rounded mb-2"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-purple-300"
                 />
                 <input
                   type="text"
                   value={issuanceForm.courseName}
                   onChange={(e) => setIssuanceForm(prev => ({ ...prev, courseName: e.target.value }))}
                   placeholder="Course Name"
-                  className="w-full p-2 border rounded mb-2"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-purple-300"
                 />
                 <input
                   type="text"
                   value={issuanceForm.certificateId}
                   onChange={(e) => setIssuanceForm(prev => ({ ...prev, certificateId: e.target.value }))}
                   placeholder="Certificate ID (e.g., CERT-2025-001)"
-                  className="w-full p-2 border rounded mb-2"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-purple-300"
                 />
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                    className="w-full"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                >
+                  {loading ? 'Issuing...' : 'Issue Certificate'}
+                </button>
+              </form>
+            </div>
+
+            {/* Verifier Column */}
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold mb-6 text-center text-indigo-600">Verifier Portal</h2>
+              <div className="space-y-4">
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
-                  className="w-full p-2 border rounded"
+                  type="text"
+                  value={certificateId}
+                  onChange={(e) => setCertificateId(e.target.value)}
+                  placeholder="Enter Certificate ID"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-300"
                 />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-              >
-                {loading ? 'Issuing...' : 'Issue Certificate'}
-              </button>
-            </form>
-          </div>
-          
-          {/* Verify Certificate Section */}
-          <div className="mb-4">
-            <h2 className="text-xl font-bold mb-4">Verify Certificate</h2>
-            <input
-              type="text"
-              value={certificateId}
-              onChange={(e) => setCertificateId(e.target.value)}
-              placeholder="Enter Certificate ID"
-              className="w-full p-2 border rounded mb-2"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setVerificationImage(e.target.files?.[0] || null)}
-              className="w-full p-2 border rounded mb-2"
-            />
-          </div>
-          
-          <button
-            onClick={verifyCertificate}
-            disabled={loading || !certificateId || !verificationImage}
-            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          >
-            {loading ? 'Verifying...' : 'Verify Certificate'}
-          </button>
-          
-          {certificate && (
-            <div className="mt-8 p-4 border rounded">
-              <h2 className="text-xl font-bold mb-4">Certificate Details</h2>
-              <div className="space-y-2">
-                <p><strong>Student Name:</strong> {certificate.studentName}</p>
-                <p><strong>Course Name:</strong> {certificate.courseName}</p>
-                <p><strong>Issue Date:</strong> {certificate.issueDate}</p>
-                <p><strong>Status:</strong> {certificate.isValid ? 'Valid' : 'Invalid'}</p>
-                <p><strong>Issuer:</strong> {certificate.issuer}</p>
-                <p><strong>Image Verification:</strong> {
-                  imageVerificationResult === null ? 'Pending' :
-                  imageVerificationResult ? 'Image Verified ' : 'Image Mismatch '
-                }</p>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setVerificationImage(e.target.files?.[0] || null)}
+                    className="w-full"
+                  />
+                </div>
+                <button
+                  onClick={verifyCertificate}
+                  disabled={loading || !certificateId || !verificationImage}
+                  className="w-full bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                >
+                  {loading ? 'Verifying...' : 'Verify Certificate'}
+                </button>
               </div>
             </div>
-          )}
+
+            {/* Client Column */}
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Client Portal</h2>
+              {certificate && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold mb-4">Certificate Details</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                    <p><strong>Student Name:</strong> {certificate.studentName}</p>
+                    <p><strong>Course Name:</strong> {certificate.courseName}</p>
+                    <p><strong>Issue Date:</strong> {certificate.issueDate}</p>
+                    <p><strong>Status:</strong> <span className={certificate.isValid ? "text-green-600" : "text-red-600"}>
+                      {certificate.isValid ? 'Valid' : 'Invalid'}
+                    </span></p>
+                    <p><strong>Issuer:</strong> {certificate.issuer}</p>
+                    <p><strong>Image Verification:</strong> <span className={
+                      imageVerificationResult === null ? "text-yellow-600" :
+                      imageVerificationResult ? "text-green-600" : "text-red-600"
+                    }>
+                      {imageVerificationResult === null ? 'Pending' :
+                       imageVerificationResult ? 'Image Verified' : 'Image Mismatch'}
+                    </span></p>
+                  </div>
+                </div>
+              )}
+              {!certificate && (
+                <div className="text-center text-gray-500">
+                  <p>No certificate details to display.</p>
+                  <p>Use the verifier section to check certificate details.</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </main>
